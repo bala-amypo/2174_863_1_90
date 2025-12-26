@@ -71,4 +71,11 @@ public class DuplicateDetectionLog {
     public void setDetectedAt(LocalDateTime detectedAt) {
         this.detectedAt = detectedAt;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.detectedAt == null) {
+            this.detectedAt = LocalDateTime.now();
+        }
+    }
 }
