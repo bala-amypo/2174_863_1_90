@@ -40,34 +40,45 @@ public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
         for (DuplicateRule rule : rules) {
             double score = 0.0;
 
-            // EXACT MATCH
-            if ("EXACT_MATCH".equalsIgnoreCase(rule.getMatchType())) {
-                String t1 = normalize(target.getSubject() + " " + target.getDescription());
-                String t2 = normalize(candidate.getSubject() + " " + candidate.getDescription());
+            String matchType = rule.getMatchType();
 
-                if (t1.equals(t2)) {
+            if ("EXACT_MATCH".equalsIgnoreCase(matchType)) {
+                if (target.getSubject() != null &&
+                    candidate.getSubject() != null &&
+                    target.getSubject().equalsIgnoreCase(candidate.getSubject()) &&
+                    target.getDescription() != null &&
+                    candidate.getDescription() != null &&
+                    target.getDescription().equalsIgnoreCase(candidate.getDescription())) {
+
                     score = 100.0;
                 }
             }
 
-            // KEYWORD MATCH
-            else if ("KEYWORD".equalsIgnoreCase(rule.getMatchType())) {
-                score = keywordMatchPercentage(
-                        target.getSubject() + " " + target.getDescription(),
-                        candidate.getSubject() + " " + candidate.getDescription()
-                );
+            else if ("KEYWORD".equalsIgnoreCase(matchType)) {
+                score = TextSimilarityUtil.similarity(
+                        target.getSubject(),
+                        candidate.getSubject()
+                ) * 100;
+            }
+
+            else if ("SIMILARITY".equalsIgnoreCase(matchType)) {
+                score = TextSimilarityUtil.similarity(
+                        target.getDescription(),
+                        candidate.getDescription()
+                ) * 100;
             }
 
             if (score >= rule.getThreshold()) {
                 DuplicateDetectionLog log =
                         logRepository.save(new DuplicateDetectionLog(target, candidate, score));
                 logs.add(log);
-                break; // stop checking rules for this ticket
+                break;
             }
         }
     }
     return logs;
 }
+
 
 
     @Override
