@@ -1,11 +1,7 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.DuplicateDetectionLog;
-import com.example.demo.model.DuplicateRule;
-import com.example.demo.model.Ticket;
-import com.example.demo.repository.DuplicateDetectionLogRepository;
-import com.example.demo.repository.DuplicateRuleRepository;
-import com.example.demo.repository.TicketRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.DuplicateDetectionService;
 import com.example.demo.util.TextSimilarityUtil;
 import org.springframework.stereotype.Service;
@@ -41,17 +37,17 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
         List<DuplicateDetectionLog> logs = new ArrayList<>();
 
         for (Ticket candidate : openTickets) {
-            if (candidate.getId().equals(target.getId())) {
-                continue;
-            }
 
-            boolean matched = false;
+            // ✅ FIX 1: skip same object, NOT id comparison
+            if (candidate == target) continue;
+
             double maxScore = 0.0;
+            boolean matched = false;
 
             for (DuplicateRule rule : rules) {
                 double score = 0.0;
 
-                // ✅ EXACT MATCH — SUBJECT (CASE INSENSITIVE)
+                // ✅ EXACT MATCH — subject only, case-insensitive
                 if ("EXACT_MATCH".equalsIgnoreCase(rule.getMatchType())) {
                     if (target.getSubject() != null &&
                         candidate.getSubject() != null &&
@@ -60,7 +56,7 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
                     }
                 }
 
-                // ✅ KEYWORD — SUBJECT SIMILARITY
+                // ✅ KEYWORD — subject similarity
                 else if ("KEYWORD".equalsIgnoreCase(rule.getMatchType())) {
                     score = TextSimilarityUtil.similarity(
                             target.getSubject(),
@@ -68,7 +64,7 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
                     );
                 }
 
-                // ✅ SIMILARITY — DESCRIPTION SIMILARITY
+                // ✅ SIMILARITY — description similarity
                 else if ("SIMILARITY".equalsIgnoreCase(rule.getMatchType())) {
                     score = TextSimilarityUtil.similarity(
                             target.getDescription(),
@@ -76,6 +72,7 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
                     );
                 }
 
+                // ✅ threshold logic
                 if (score >= rule.getThreshold()) {
                     matched = true;
                     maxScore = Math.max(maxScore, score);
@@ -84,9 +81,9 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
 
             if (matched) {
                 logs.add(
-                        logRepository.save(
-                                new DuplicateDetectionLog(target, candidate, maxScore)
-                        )
+                    logRepository.save(
+                        new DuplicateDetectionLog(target, candidate, maxScore)
+                    )
                 );
             }
         }
