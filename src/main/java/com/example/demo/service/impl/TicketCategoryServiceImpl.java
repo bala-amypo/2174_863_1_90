@@ -5,6 +5,8 @@ import com.example.demo.repository.TicketCategoryRepository;
 import com.example.demo.service.TicketCategoryService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TicketCategoryServiceImpl implements TicketCategoryService {
 
@@ -17,13 +19,19 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
     @Override
     public TicketCategory createCategory(TicketCategory category) {
         if (categoryRepository.existsByCategoryName(category.getCategoryName())) {
-            throw new com.example.demo.exception.DuplicateResourceException("Category already exists");
+            throw new RuntimeException("Category already exists");
         }
         return categoryRepository.save(category);
     }
 
     @Override
     public TicketCategory getCategory(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Category not found"));
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    @Override
+    public List<TicketCategory> getAllCategories() {
+        return categoryRepository.findAll();
     }
 }

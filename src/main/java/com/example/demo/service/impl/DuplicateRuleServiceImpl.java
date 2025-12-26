@@ -5,6 +5,8 @@ import com.example.demo.repository.DuplicateRuleRepository;
 import com.example.demo.service.DuplicateRuleService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DuplicateRuleServiceImpl implements DuplicateRuleService {
 
@@ -17,13 +19,19 @@ public class DuplicateRuleServiceImpl implements DuplicateRuleService {
     @Override
     public DuplicateRule createRule(DuplicateRule rule) {
         if (ruleRepository.findByRuleName(rule.getRuleName()).isPresent()) {
-            throw new com.example.demo.exception.DuplicateResourceException("Rule already exists");
+            throw new RuntimeException("Rule already exists");
         }
         return ruleRepository.save(rule);
     }
 
     @Override
     public DuplicateRule getRule(Long id) {
-        return ruleRepository.findById(id).orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Rule not found"));
+        return ruleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rule not found"));
+    }
+
+    @Override
+    public List<DuplicateRule> getAllRules() {
+        return ruleRepository.findAll();
     }
 }
