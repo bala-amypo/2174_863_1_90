@@ -3,9 +3,9 @@ package com.example.demo.service.impl;
 import com.example.demo.model.TicketCategory;
 import com.example.demo.repository.TicketCategoryRepository;
 import com.example.demo.service.TicketCategoryService;
-import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.DuplicateResourceException;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,9 +20,9 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
     @Override
     public TicketCategory createCategory(TicketCategory category) {
         if (ticketCategoryRepository.existsByCategoryName(category.getCategoryName())) {
-            throw new IllegalArgumentException("category exists");
+            throw new DuplicateResourceException("category exists");
         }
-        category.setCreatedAt(LocalDateTime.now());
+        // Removed manual createdAt setting
         return ticketCategoryRepository.save(category);
     }
 
@@ -33,6 +33,6 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
 
     @Override
     public TicketCategory getCategory(Long id) {
-        return ticketCategoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Category not found"));
+        return ticketCategoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 }
