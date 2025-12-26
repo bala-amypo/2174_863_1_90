@@ -1,5 +1,6 @@
-package com.example.demo.comfig;
+package com.example.demo.config;
 
+import com.example.demo.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,7 +33,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/users/register", "/api/auth/**", "/h2-console/**","swagger").permitAll()
+                auth.requestMatchers("/api/users/register", "/api/auth/**", "/h2-console/**","/swagger-ui/**").permitAll()
                     .anyRequest().authenticated()
             );
         
