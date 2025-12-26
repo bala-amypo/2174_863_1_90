@@ -3,7 +3,6 @@ package com.example.demo.service.impl;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.DuplicateDetectionService;
-import com.example.demo.util.TextSimilarityUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -81,4 +80,25 @@ public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
         return logRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Log not found"));
     }
+    private String normalize(String text) {
+    return text == null ? "" :
+            text.toLowerCase().replaceAll("[^a-z0-9 ]", "").trim();
+}
+
+private double keywordMatchPercentage(String a, String b) {
+    String[] wordsA = normalize(a).split("\\s+");
+    String[] wordsB = normalize(b).split("\\s+");
+
+    int matches = 0;
+    for (String w : wordsA) {
+        for (String x : wordsB) {
+            if (w.equals(x)) {
+                matches++;
+                break;
+            }
+        }
+    }
+    return wordsA.length == 0 ? 0.0 : (matches * 100.0) / wordsA.length;
+}
+
 }
