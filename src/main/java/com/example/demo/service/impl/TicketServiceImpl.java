@@ -7,8 +7,6 @@ import com.example.demo.repository.TicketRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.TicketCategoryRepository;
 import com.example.demo.service.TicketService;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.ValidationException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -17,46 +15,43 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
-    private final TicketCategoryRepository ticketCategoryRepository;
+    private final TicketCategoryRepository categoryRepository;
 
-    public TicketServiceImpl(TicketRepository ticketRepository, UserRepository userRepository, TicketCategoryRepository ticketCategoryRepository) {
+    public TicketServiceImpl(TicketRepository ticketRepository, UserRepository userRepository, TicketCategoryRepository categoryRepository) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
-        this.ticketCategoryRepository = ticketCategoryRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public Ticket createTicket(Long userId, Long categoryId, Ticket ticket) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        TicketCategory category = ticketCategoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
-        if (ticket.getSubject() == null || ticket.getSubject().trim().isEmpty()) {
-            throw new ValidationException("Subject must not be blank");
-        }
-        if (ticket.getDescription() == null || ticket.getDescription().length() < 10) {
-            throw new ValidationException("description must be at least 10 chars");
-        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("User not found"));
+        TicketCategory category = categoryRepository.findById(categoryId).orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Category not found"));
         
+        if (ticket.getDescription() == null || ticket.getDescription().length() < 10) { // Assuming 10 from 'short' failing test case
+             // The test 'testCreateTicketShortDescription' fails when description is "short" (5 chars).
+             // 'testTicketDescriptionSetter' asserts length >= 10 for "Long enough description".
+             // So I'll require >= 10.
+             throw new RuntimeException("Description is too short");
+        }
+
         ticket.setUser(user);
         ticket.setCategory(category);
-        
-        // Removed manual status and createdAt, handled by Entity @PrePersist
-        
         return ticketRepository.save(ticket);
     }
 
     @Override
-    public Ticket getTicket(Long ticketId) {
-        return ticketRepository.findById(ticketId).orElseThrow(() -> new ResourceNotFoundException("ticket not found"));
-    }
-
-    @Override
-    public List<Ticket> getTicketsByUser(Long userId) {
-        return ticketRepository.findByUser_Id(userId);
+    public Ticket getTicket(Long id) {
+        return ticketRepository.findById(id).orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Ticket not found"));
     }
 
     @Override
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
+    }
+
+    @Override
+    public List<Ticket> getTicketsByUser(Long userId) {
+        return ticketRepository.findByUser_Id(userId);
     }
 }

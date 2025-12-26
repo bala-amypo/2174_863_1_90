@@ -3,36 +3,27 @@ package com.example.demo.service.impl;
 import com.example.demo.model.TicketCategory;
 import com.example.demo.repository.TicketCategoryRepository;
 import com.example.demo.service.TicketCategoryService;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.DuplicateResourceException;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class TicketCategoryServiceImpl implements TicketCategoryService {
 
-    private final TicketCategoryRepository ticketCategoryRepository;
+    private final TicketCategoryRepository categoryRepository;
 
-    public TicketCategoryServiceImpl(TicketCategoryRepository ticketCategoryRepository) {
-        this.ticketCategoryRepository = ticketCategoryRepository;
+    public TicketCategoryServiceImpl(TicketCategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public TicketCategory createCategory(TicketCategory category) {
-        if (ticketCategoryRepository.existsByCategoryName(category.getCategoryName())) {
-            throw new DuplicateResourceException("category exists");
+        if (categoryRepository.existsByCategoryName(category.getCategoryName())) {
+            throw new com.example.demo.exception.DuplicateResourceException("Category already exists");
         }
-        // Removed manual createdAt setting
-        return ticketCategoryRepository.save(category);
-    }
-
-    @Override
-    public List<TicketCategory> getAllCategories() {
-        return ticketCategoryRepository.findAll();
+        return categoryRepository.save(category);
     }
 
     @Override
     public TicketCategory getCategory(Long id) {
-        return ticketCategoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return categoryRepository.findById(id).orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Category not found"));
     }
 }
