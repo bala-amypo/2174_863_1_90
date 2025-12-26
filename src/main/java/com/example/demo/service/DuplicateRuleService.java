@@ -6,3 +6,4 @@ public interface DuplicateRuleService {
     DuplicateRule createRule(DuplicateRule rule);
     DuplicateRule getRule(Long id);
 }
+`
