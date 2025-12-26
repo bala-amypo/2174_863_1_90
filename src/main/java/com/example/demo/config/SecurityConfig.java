@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.example.demo.comfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +32,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/users/register", "/api/auth/**", "/h2-console/**").permitAll()
+                auth.requestMatchers("/api/users/register", "/api/auth/**", "/h2-console/**","swagger").permitAll()
                     .anyRequest().authenticated()
             );
         
