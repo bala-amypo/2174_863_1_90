@@ -1,38 +1,30 @@
 package com.example.demo.util;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TextSimilarityUtil {
 
-    public static double similarity(String text1, String text2) {
-        if (text1 == null || text2 == null || text1.trim().isEmpty() || text2.trim().isEmpty()) {
-            return 0.0;
-        }
-
-        if (text1.equalsIgnoreCase(text2)) {
-            return 1.0;
-        }
-
-        Set<String> words1 = Arrays.stream(text1.toLowerCase().split("\\W+"))
-                .filter(w -> !w.isEmpty())
+    public static double similarity(String s1, String s2) {
+        if (s1 == null || s2 == null) return 0.0;
+        if (s1.equals(s2)) return 1.0;
+        
+        // Simple Jaccard similarity
+        Set<String> set1 = Arrays.stream(s1.toLowerCase().split("\\s+"))
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toSet());
+        Set<String> set2 = Arrays.stream(s2.toLowerCase().split("\\s+"))
+                .filter(s -> !s.isBlank())
                 .collect(Collectors.toSet());
 
-        Set<String> words2 = Arrays.stream(text2.toLowerCase().split("\\W+"))
-                .filter(w -> !w.isEmpty())
-                .collect(Collectors.toSet());
+        if (set1.isEmpty() && set2.isEmpty()) return 1.0; // Both empty?
+        if (set1.isEmpty() || set2.isEmpty()) return 0.0;
 
-        if (words1.isEmpty() || words2.isEmpty()) {
-            return 0.0;
-        }
+        Set<String> intersection = new HashSet<>(set1);
+        intersection.retainAll(set2);
 
-        Set<String> intersection = new HashSet<>(words1);
-        intersection.retainAll(words2);
-
-        Set<String> union = new HashSet<>(words1);
-        union.addAll(words2);
+        Set<String> union = new HashSet<>(set1);
+        union.addAll(set2);
 
         return (double) intersection.size() / union.size();
     }
