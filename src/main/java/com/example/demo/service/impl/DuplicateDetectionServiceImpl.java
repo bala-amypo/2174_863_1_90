@@ -26,50 +26,50 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
     }
 
     @Override
-    public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
-        Ticket target = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
+    Ticket target = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        List<DuplicateRule> rules = ruleRepository.findAll();
-        List<Ticket> openTickets = ticketRepository.findByStatus("OPEN");
+    List<DuplicateRule> rules = ruleRepository.findAll();
+    List<Ticket> openTickets = ticketRepository.findByStatus("OPEN");
 
-        List<DuplicateDetectionLog> logs = new ArrayList<>();
+    List<DuplicateDetectionLog> logs = new ArrayList<>();
 
-        for (Ticket candidate : openTickets) {
-            if (candidate.getId().equals(target.getId())) continue;
+    for (Ticket candidate : openTickets) {
+        if (candidate.getId().equals(target.getId())) continue;
 
-            double maxScore = 0.0;
-            boolean matched = false;
+        for (DuplicateRule rule : rules) {
+            double score = 0.0;
 
-            for (DuplicateRule rule : rules) {
-                double score = 0.0;
+            // EXACT MATCH
+            if ("EXACT_MATCH".equalsIgnoreCase(rule.getMatchType())) {
+                String t1 = normalize(target.getSubject() + " " + target.getDescription());
+                String t2 = normalize(candidate.getSubject() + " " + candidate.getDescription());
 
-                if ("EXACT_MATCH".equalsIgnoreCase(rule.getMatchType())) {
-                    if (target.getSubject() != null &&
-                        target.getSubject().equalsIgnoreCase(candidate.getSubject())) {
-                        score = 1.0;
-                    }
-                } else {
-                    score = TextSimilarityUtil.similarity(
-                            target.getDescription(),
-                            candidate.getDescription()
-                    );
-                }
-
-                if (score >= rule.getThreshold()) {
-                    matched = true;
-                    maxScore = Math.max(maxScore, score);
+                if (t1.equals(t2)) {
+                    score = 100.0;
                 }
             }
 
-            if (matched) {
+            // KEYWORD MATCH
+            else if ("KEYWORD".equalsIgnoreCase(rule.getMatchType())) {
+                score = keywordMatchPercentage(
+                        target.getSubject() + " " + target.getDescription(),
+                        candidate.getSubject() + " " + candidate.getDescription()
+                );
+            }
+
+            if (score >= rule.getThreshold()) {
                 DuplicateDetectionLog log =
-                        logRepository.save(new DuplicateDetectionLog(target, candidate, maxScore));
+                        logRepository.save(new DuplicateDetectionLog(target, candidate, score));
                 logs.add(log);
+                break; // stop checking rules for this ticket
             }
         }
-        return logs;
     }
+    return logs;
+}
+
 
     @Override
     public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
