@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    List<Ticket> findByCategory_Id(Long id);
-    List<Ticket> findByUser_Id(Long id);
     List<Ticket> findByStatus(String status);
+    List<Ticket> findByCategory_Id(Long categoryId);
     List<Ticket> findBySubjectContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String subject, String description);
+    List<Ticket> findByUser_Id(Long userId);
 }
