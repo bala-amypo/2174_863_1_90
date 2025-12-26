@@ -1,4 +1,6 @@
-package com.example.demo.security;
+package com.example.demo.config;
+
+import com.e
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,7 +33,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/users/register", "/api/auth/**", "/h2-console/**","/swagger-ui/**").permitAll()
+                auth.requestMatchers("/api/users/register", "/api/auth/**", "/h2-console/**","/swagger-ui/**", "/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()
             );
         
