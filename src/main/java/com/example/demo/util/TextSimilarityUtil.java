@@ -6,23 +6,18 @@ import java.util.stream.Collectors;
 public class TextSimilarityUtil {
 
     public static double similarity(String s1, String s2) {
-
         if (s1 == null || s2 == null) return 0.0;
-
-        s1 = s1.trim().toLowerCase();
-        s2 = s2.trim().toLowerCase();
-
         if (s1.equals(s2)) return 1.0;
-
-        Set<String> set1 = Arrays.stream(s1.split("\\s+"))
+        
+        // Simple Jaccard similarity
+        Set<String> set1 = Arrays.stream(s1.toLowerCase().split("\\s+"))
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toSet());
+        Set<String> set2 = Arrays.stream(s2.toLowerCase().split("\\s+"))
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toSet());
 
-        Set<String> set2 = Arrays.stream(s2.split("\\s+"))
-                .filter(s -> !s.isBlank())
-                .collect(Collectors.toSet());
-
-        if (set1.isEmpty() && set2.isEmpty()) return 1.0;
+        if (set1.isEmpty() && set2.isEmpty()) return 1.0; // Both empty?
         if (set1.isEmpty() || set2.isEmpty()) return 0.0;
 
         Set<String> intersection = new HashSet<>(set1);
