@@ -1,32 +1,39 @@
 package com.example.demo.util;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class TextSimilarityUtil {
 
-    private TextSimilarityUtil() {
-    }
-
-    public static double similarity(String s1, String s2) {
-
-        if (s1 == null || s2 == null) return 0.0;
-
-        s1 = s1.toLowerCase();
-        s2 = s2.toLowerCase();
-
-        String[] words1 = s1.split("\\s+");
-        String[] words2 = s2.split("\\s+");
-
-        int common = 0;
-        for (String w1 : words1) {
-            for (String w2 : words2) {
-                if (w1.equals(w2)) {
-                    common++;
-                }
-            }
+    public static double similarity(String text1, String text2) {
+        if (text1 == null || text2 == null || text1.trim().isEmpty() || text2.trim().isEmpty()) {
+            return 0.0;
         }
 
-        int total = Math.max(words1.length, words2.length);
-        if (total == 0) return 0.0;
+        if (text1.equalsIgnoreCase(text2)) {
+            return 1.0;
+        }
 
-        return (double) common / total;
+        Set<String> words1 = Arrays.stream(text1.toLowerCase().split("\\W+"))
+                .filter(w -> !w.isEmpty())
+                .collect(Collectors.toSet());
+
+        Set<String> words2 = Arrays.stream(text2.toLowerCase().split("\\W+"))
+                .filter(w -> !w.isEmpty())
+                .collect(Collectors.toSet());
+
+        if (words1.isEmpty() || words2.isEmpty()) {
+            return 0.0;
+        }
+
+        Set<String> intersection = new HashSet<>(words1);
+        intersection.retainAll(words2);
+
+        Set<String> union = new HashSet<>(words1);
+        union.addAll(words2);
+
+        return (double) intersection.size() / union.size();
     }
 }
