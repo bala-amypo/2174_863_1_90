@@ -79,4 +79,11 @@ public class DuplicateRule {
     public void setLogs(List<DuplicateDetectionLog> logs) {
         this.logs = logs;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
 }

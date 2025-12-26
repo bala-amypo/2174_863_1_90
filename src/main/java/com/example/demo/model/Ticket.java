@@ -105,4 +105,14 @@ public class Ticket {
     public void setLogsAsMatched(List<DuplicateDetectionLog> logsAsMatched) {
         this.logsAsMatched = logsAsMatched;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.status == null) {
+            this.status = "OPEN";
+        }
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
 }
