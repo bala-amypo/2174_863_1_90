@@ -44,13 +44,20 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(jwt, authRequest.getEmail()));
     }
  
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
- 
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+   @PostMapping("/register")
+public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
 
-        
-
-        return ResponseEntity.ok("User registered successfully");
+    if (userRepository.existsByEmail(request.getEmail())) {
+        return ResponseEntity.badRequest().body("User already exists");
     }
+
+    User user = new User();
+    user.setEmail(request.getEmail());
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+    userRepository.save(user);
+
+    return ResponseEntity.ok("User registered successfully");
+}
+
 }
