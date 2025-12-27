@@ -18,10 +18,23 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
-    @PostMapping("/{userId}/{categoryId}")
-    public ResponseEntity<Ticket> createTicket(@PathVariable Long userId, @PathVariable Long categoryId, @RequestBody Ticket ticket) {
-        return ResponseEntity.ok(ticketService.createTicket(userId, categoryId, ticket));
-    }
+    @PostMapping("/users/{userId}/categories/{categoryId}/tickets")
+public Ticket createTicket(
+        @PathVariable Long userId,
+        @PathVariable Long categoryId,
+        @RequestBody Ticket ticket) {
+
+    User user = userRepository.findById(userId).orElseThrow();
+    Category category = categoryRepository.findById(categoryId).orElseThrow();
+
+    ticket.setUser(user);
+    ticket.setCategory(category);
+    ticket.setStatus("OPEN");
+    ticket.setCreatedAt(LocalDateTime.now());
+
+    return ticketRepository.save(ticket);
+}
+
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Ticket>> getTicketsByUser(@PathVariable Long userId) {
