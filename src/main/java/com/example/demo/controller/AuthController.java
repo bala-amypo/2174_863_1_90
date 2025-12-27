@@ -36,7 +36,6 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // 🔐 LOGIN
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
 
@@ -56,7 +55,6 @@ public class AuthController {
         );
     }
 
-    // 🆕 REGISTER
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
 
